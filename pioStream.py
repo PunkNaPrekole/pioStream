@@ -1,21 +1,11 @@
 import cv2
 import socket
 import pickle
-import resource
+import threading
 
 
-def start_video_stream(udp_ip: str = "0.0.0.0", udp_port: int = 5005, packet_size: int = 65507):
-    usage_before = resource.getrusage(resource.RUSAGE_SELF)
-    cap = cv2.VideoCapture(0)
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind((udp_ip, udp_port))
-
-    while True:
-        data, addr = sock.recvfrom(1024)
-        if data.decode() == "start_video":
-            break
-
-    while True:
+def video_streaming(sock, addr, cap, packet_size, stop_event):
+    while not stop_event.is_set():
         ret, frame = cap.read()
         if not ret:
             break
@@ -26,11 +16,29 @@ def start_video_stream(udp_ip: str = "0.0.0.0", udp_port: int = 5005, packet_siz
             sock.sendto(chunk, addr)
         sock.sendto(b'END', addr)
 
-    cap.release()
-    sock.close()
-    usage_after = resource.getrusage(resource.RUSAGE_SELF)
-    print("CPU time consumption:", usage_after.ru_utime - usage_before.ru_utime)
-    print("Maximum memory consumption (in kilobytes):", usage_after.ru_maxrss)
+
+def start_video_stream(udp_ip: str = "0.0.0.0", udp_port: int = 5005, packet_size: int = 65507):
+    cap = cv2.VideoCapture(0)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind((udp_ip, udp_port))
+
+    stream_thread = None
+    stop_event = threading.Event()
+
+    while True:
+        data, addr = sock.recvfrom(1024)
+        command = data.decode()
+        if command == "start_video":
+            if stream_thread is None or not stream_thread.is_alive():
+                stop_event.clear()
+                stream_thread = threading.Thread(target=video_streaming, args=(sock, addr, cap, packet_size, stop_event))
+                stream_thread.start()
+        elif command == "stop_video":
+            stop_event.set()
+            if stream_thread is not None:
+                stream_thread.join()
+            cap.release()
+            cap = cv2.VideoCapture(0)
 
 
 if __name__ == "__main__":
