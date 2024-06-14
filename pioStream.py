@@ -1,9 +1,11 @@
 import cv2
 import socket
 import pickle
+import resource
 
 
 def start_video_stream(udp_ip: str = "0.0.0.0", udp_port: int = 5005, packet_size: int = 65507):
+    usage_before = resource.getrusage(resource.RUSAGE_SELF)
     cap = cv2.VideoCapture(0)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((udp_ip, udp_port))
@@ -26,6 +28,9 @@ def start_video_stream(udp_ip: str = "0.0.0.0", udp_port: int = 5005, packet_siz
 
     cap.release()
     sock.close()
+    usage_after = resource.getrusage(resource.RUSAGE_SELF)
+    print("CPU time consumption:", usage_after.ru_utime - usage_before.ru_utime)
+    print("Maximum memory consumption (in kilobytes):", usage_after.ru_maxrss)
 
 
 if __name__ == "__main__":

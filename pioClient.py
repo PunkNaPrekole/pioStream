@@ -19,3 +19,7 @@ def start_video_stream(udp_ip: str, udp_port: int = 5005, packet_size: int = 655
             data += packet
 
     cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    start_video_stream("192.168.0.104")
