@@ -1,8 +1,8 @@
 1) Перенесите rtspServer.py и pio-rtsp-server.service через ftp с помощью scp \
   scp path/to/rtcpServer.py pi@<drone_ip>:/home/pi/ \
   scp path/to/pio-rtsp-server.service pi@<drone_ip>:/home/pi/
-3) Перенесите pioStream.service в директорию /etc/systemd/system \
-   sudo mv /path/to/pioStream.service /etc/systemd/system/pio-rtsp-server.service
+3) Перенесите pio-rtsp-server.service в директорию /etc/systemd/system \
+   sudo mv /path/to/pio-rtsp-server.service /etc/systemd/system/
 4) Сделайте скрипт rtspServer.py исполняемым \
    chmod +x /home/pi/rtspServer.py
 5) Перезагрузите systemd для применения изменений \
