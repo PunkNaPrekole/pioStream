@@ -1,0 +1,11 @@
+[Unit]
+Description=piosdk streaming server
+After=network.target
+
+[Service]
+WorkingDirectory=/home/pi/
+ExecStart=/home/pi/pioStream.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

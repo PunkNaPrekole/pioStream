@@ -1,3 +1,4 @@
+#! /usr/bin/env python3
 import gi
 gi.require_version('Gst', '1.0')
 gi.require_version('GstRtspServer', '1.0')
